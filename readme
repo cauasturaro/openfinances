@@ -1,0 +1,3 @@
+No server:
+    Criar ".env" e copiar tudo do ".env.development"
+    Mudar "DATABASE_URL" no .env do server para a sua
