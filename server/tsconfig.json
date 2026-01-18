@@ -1,25 +1,15 @@
 {
   "compilerOptions": {
-    /* Configurações Básicas */
     "target": "ES2022",
+    "lib": ["ES2023"],
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "lib": ["ES2023"],
-    
-    /* Configurações de Módulos */
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-
-    /* Checagem de Tipos */
     "strict": true,
-    "skipLibCheck": true,            // Ignora erros dentro dos arquivos .d.ts das libs (economiza dor de cabeça)
-    "noUncheckedIndexedAccess": true,
-    
-    /* Saída */
+    "skipLibCheck": true,
     "outDir": "./dist",
     "rootDir": "./src"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules"]
+  "include": ["src/**/*"]
 }
