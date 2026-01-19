@@ -8,11 +8,12 @@ export class CategoryService {
     });
   }
 
-  async create(userId: number, name: string) {
+  async create(userId: number, name: string, color?: string) {
     return await prisma.category.create({
       data: {
         name,
         userId,
+        color: color ,
       },
     });
   }

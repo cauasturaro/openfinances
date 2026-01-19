@@ -7,7 +7,7 @@ export class TransactionService {
       where: { userId },
       orderBy: { date: 'desc' },
       include: {
-        category: { select: { id: true, name: true } },
+        category: { select: { id: true, name: true, color: true } },
         paymentMethod: { select: { id: true, name: true } },
       }
     });

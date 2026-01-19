@@ -101,7 +101,12 @@ export function TransactionDetailsDialog({
                 </div>
                 <span className="text-sm font-medium">Category</span>
               </div>
-              <Badge variant="outline" className="font-normal px-3 py-1 bg-white dark:bg-zinc-900">
+              
+              <Badge 
+                variant="outline" 
+                className="font-normal px-3 py-1 text-white border-0"
+                style={{ fontWeight: 'bold', backgroundColor: transaction.category?.color || '#52525b' }} 
+              >
                 {transaction.category?.name || "Uncategorized"}
               </Badge>
             </div>

@@ -8,7 +8,7 @@ export class PaymentMethodService {
     });
   }
 
-  async create(userId: number, name: string) {
+  async create(userId: number, name: string ) {
     return await prisma.paymentMethod.create({
       data: {
         name,

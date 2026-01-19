@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { TransactionService } from "@/services/TransactionService";
-import { Loader2, Plus, Tag, CreditCard, Trash2, AlertCircle } from "lucide-react";
+import { Loader2, Plus, Tag, CreditCard, Trash2, AlertCircle, Check } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,15 +9,32 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
+
+// Paleta de cores (Tailwind shades 500)
+const COLORS = [
+  "#ef4444", // Red
+  "#f97316", // Orange
+  "#f59e0b", // Amber
+  "#84cc16", // Lime
+  "#10b981", // Emerald
+  "#06b6d4", // Cyan
+  "#3b82f6", // Blue
+  "#6366f1", // Indigo
+  "#a855f7", // Purple
+  "#ec4899", // Pink
+  "#71717a", // Zinc
+];
 
 interface RemovableItemProps {
   id: number;
   name: string;
+  color?: string; 
   icon: React.ReactNode;
   onDelete: (id: number) => Promise<void>;
 }
 
-function RemovableItem({ id, name, icon, onDelete }: RemovableItemProps) {
+function RemovableItem({ id, name, color, icon, onDelete }: RemovableItemProps) {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
@@ -33,10 +50,16 @@ function RemovableItem({ id, name, icon, onDelete }: RemovableItemProps) {
   return (
     <div className="group flex items-center justify-between p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all shadow-sm">
       <div className="flex items-center gap-3 overflow-hidden">
-        <div className="p-2 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-500 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors">
+        <div 
+          className={cn(
+            "p-2 rounded-md transition-colors shadow-sm",
+            color ? "text-white" : "text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800"
+          )}
+          style={color ? { backgroundColor: color } : {}}
+        >
           {icon}
         </div>
-        <span className="text-sm font-medium truncate text-zinc-700 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-white">
+        <span className="text-sm font-medium truncate text-zinc-700 dark:text-zinc-300">
           {name}
         </span>
       </div>
@@ -60,8 +83,8 @@ function RemovableItem({ id, name, icon, onDelete }: RemovableItemProps) {
 }
 
 interface ManageDataDialogProps {
-  categories: { id: number; name: string }[];
-  paymentMethods: { id: number; name: string }[];
+  categories: { id: number; name: string; color: string }[];
+  paymentMethods: { id: number; name: string }[]; 
   onUpdate: () => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -85,6 +108,7 @@ export function ManageDataDialog({
 
   const [loading, setLoading] = useState(false);
   const [newItemName, setNewItemName] = useState("");
+  const [selectedColor, setSelectedColor] = useState(COLORS[4]); 
   const [activeTab, setActiveTab] = useState(defaultTab);
 
   const handleCreate = async () => {
@@ -92,7 +116,7 @@ export function ManageDataDialog({
     setLoading(true);
     try {
       if (activeTab === "categories") {
-        await TransactionService.createCategory(newItemName);
+        await TransactionService.createCategory(newItemName, selectedColor);
       } else {
         await TransactionService.createPaymentMethod(newItemName);
       }
@@ -130,7 +154,7 @@ export function ManageDataDialog({
             <DialogHeader>
             <DialogTitle>Manage Classifications</DialogTitle>
             <DialogDescription>
-                Add or remove categories and payment methods to organize your finances.
+                Add or remove categories and payment methods.
             </DialogDescription>
             </DialogHeader>
         </div>
@@ -143,18 +167,45 @@ export function ManageDataDialog({
             </TabsList>
           </div>
           
-          <div className="p-6 pt-4 bg-zinc-50/50 dark:bg-black/20 min-h-87.5 flex flex-col">
-            <div className="flex gap-2 mb-6">
-                <Input 
-                placeholder={`New ${activeTab === 'categories' ? 'Category' : 'Method'} name...`}
-                value={newItemName}
-                onChange={(e) => setNewItemName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
-                className="h-10 bg-white dark:bg-zinc-900 shadow-sm"
-                />
-                <Button onClick={handleCreate} disabled={loading || !newItemName.trim()} className="h-10 w-12 shrink-0">
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-5 w-5" />}
-                </Button>
+          <div className="p-6 pt-4 bg-zinc-50/50 dark:bg-black/20 min-h-100 flex flex-col">
+            <div className="flex flex-col gap-3 mb-6">
+                <div className="flex gap-2">
+                    <Input 
+                        placeholder={`New ${activeTab === 'categories' ? 'Category' : 'Method'} name...`}
+                        value={newItemName}
+                        onChange={(e) => setNewItemName(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+                        className="h-10 bg-white dark:bg-zinc-900 shadow-sm"
+                    />
+                    <Button 
+                        onClick={handleCreate} 
+                        disabled={loading || !newItemName.trim()} 
+                        className="h-10 w-12 shrink-0 transition-colors"
+                        style={activeTab === 'categories' ? { backgroundColor: selectedColor } : {}}
+                    >
+                        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-5 w-5" />}
+                    </Button>
+                </div>
+
+                {activeTab === 'categories' && (
+                  <div className="flex flex-wrap gap-2 justify-start animate-in fade-in slide-in-from-top-1 duration-200">
+                      {COLORS.map((color) => (
+                          <button
+                              key={color}
+                              onClick={() => setSelectedColor(color)}
+                              className={cn(
+                                  "w-6 h-6 rounded-full transition-all hover:scale-110 focus:outline-none flex items-center justify-center",
+                                  selectedColor === color 
+                                      ? "ring-2 ring-offset-2 ring-zinc-400 ring-offset-zinc-50 dark:ring-offset-zinc-900 scale-110" 
+                                      : "opacity-70 hover:opacity-100"
+                              )}
+                              style={{ backgroundColor: color }}
+                          >
+                              {selectedColor === color && <Check className="h-3 w-3 text-white" strokeWidth={3} />}
+                          </button>
+                      ))}
+                  </div>
+                )}
             </div>
 
             <div className="flex items-center gap-2 mb-3 px-1">
@@ -166,7 +217,7 @@ export function ManageDataDialog({
                 </span>
             </div>
 
-            <ScrollArea className="flex-1 -mr-4 pr-4">
+            <ScrollArea className="flex-1 -mr-4 pr-4 h-62.5">
                 <div className="grid grid-cols-1 gap-2 pb-2">
                 {activeTab === 'categories' ? (
                     categories.length === 0 ? (
@@ -176,8 +227,9 @@ export function ManageDataDialog({
                         <RemovableItem 
                             key={cat.id} 
                             id={cat.id} 
-                            name={cat.name} 
-                            icon={<Tag className="h-4 w-4" />}
+                            name={cat.name}
+                            color={cat.color} 
+                            icon={<Tag className="h-3 w-3" />}
                             onDelete={handleDeleteCategory}
                         />
                     ))
@@ -190,8 +242,8 @@ export function ManageDataDialog({
                         <RemovableItem 
                             key={pm.id} 
                             id={pm.id} 
-                            name={pm.name} 
-                            icon={<CreditCard className="h-4 w-4" />}
+                            name={pm.name}
+                            icon={<CreditCard className="h-3 w-3" />}
                             onDelete={handleDeletePaymentMethod}
                         />
                     ))

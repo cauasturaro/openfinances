@@ -47,6 +47,7 @@ model PaymentMethod {
 model Category {
   id     Int    @id @default(autoincrement())
   name   String
+  color  String @default("#3babf1ff")
   userId Int
   user   User   @relation(fields: [userId], references: [id])
 
@@ -65,7 +66,7 @@ model Transaction {
   category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   paymentMethodId Int
-  paymentMethod   PaymentMethod @relation(fields: [paymentMethodId], references: [id])
+  paymentMethod   PaymentMethod @relation(fields: [paymentMethodId], references: [id], onDelete: Cascade)
 
   userId Int
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)

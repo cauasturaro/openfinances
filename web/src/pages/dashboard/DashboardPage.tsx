@@ -5,6 +5,7 @@ import {
   startOfWeek, endOfWeek, eachWeekOfInterval, eachMonthOfInterval, 
   startOfYear, endOfYear, getWeek, isSameWeek, getYear, isSameMonth
 } from "date-fns";
+
 import { TransactionService, type Transaction, type DashboardSummary } from "@/services/TransactionService";
 import { CreateTransactionDialog } from "@/components/dashboard/CreateTransactionDialog"; 
 import { ManageDataDialog } from "@/components/dashboard/ManageDataDialog";
@@ -41,13 +42,13 @@ export default function DashboardPage() {
 
   const [loading, setLoading] = useState(true);
   
-  // --- USER DATA (NOVO) ---
+  // --- USER DATA ---
   const [user, setUser] = useState<UserData | null>(null);
 
   // --- DADOS ---
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [categories, setCategories] = useState<{id: number, name: string}[]>([]);
-  const [paymentMethods, setPaymentMethods] = useState<{id: number, name: string}[]>([]);
+  const [categories, setCategories] = useState<{id: number, name: string, color: string}[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<{id: number, name: string }[]>([]);
   const [summary, setSummary] = useState<DashboardSummary>({ balance: 0, income: 0, expense: 0 });
   
   // --- ESTADOS AUX ---
@@ -121,6 +122,7 @@ export default function DashboardPage() {
     logout(); 
     navigate("/login");
   };
+
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -195,7 +197,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <ManageDataDialog categories={categories} paymentMethods={paymentMethods} onUpdate={loadData} />
+            <ManageDataDialog categories={categories} paymentMethods={paymentMethods} onUpdate={loadData} trigger={<span className="hidden" />} />
             <CreateTransactionDialog onSuccess={loadData} categories={categories} paymentMethods={paymentMethods} onDataUpdate={loadData} />
             
             <DropdownMenu>
@@ -211,10 +213,8 @@ export default function DashboardPage() {
               <DropdownMenuContent className="w-56" align="end">
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{user?.name || 'Account'}</p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {user?.email || 'Loading...'}
-                    </p>
+                    <p className="text-sm font-medium leading-none">{user?.name || 'User'}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{user?.email || 'Loading...'}</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -243,8 +243,6 @@ export default function DashboardPage() {
               )}
             </CardContent>
           </Card>
-          
-
           <Card className="shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Total Income</CardTitle>
@@ -363,9 +361,19 @@ export default function DashboardPage() {
                             {transaction.description}
                           </span>
                           <div className="flex items-center gap-1.5 text-xs text-muted-foreground truncate">
-                             <span className="truncate max-w-20 sm:max-w-none">{transaction.category?.name}</span>
+                             <Badge 
+                                variant="outline" 
+                                className="px-1.5 py-0 rounded text-[10px] font-normal uppercase tracking-wide border-0 truncate max-w-24 sm:max-w-none text-white"
+                                style={{ fontWeight: 'bold', backgroundColor: transaction.category?.color || '#52525b' }} 
+                             >
+                                {transaction.category?.name}
+                             </Badge>
                              <span className="w-1 h-1 bg-zinc-300 rounded-full shrink-0" />
-                             <span className="truncate max-w-20 sm:max-w-none">{transaction.paymentMethod?.name}</span>
+                             <span 
+                                className="truncate max-w-24 sm:max-w-none font-medium"
+                             >
+                                {transaction.paymentMethod?.name}
+                             </span>
                           </div>
                         </div>
                       </div>

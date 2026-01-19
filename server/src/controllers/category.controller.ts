@@ -13,9 +13,9 @@ export class CategoryController {
   async create(req: Request, res: Response) {
     const categoryService = new CategoryService();
     const userId = req.user.id;
-    const { name } = req.body;
+    const { name, color } = req.body;
 
-    const category = await categoryService.create(userId, name);
+    const category = await categoryService.create(userId, name, color);
     return res.status(201).json(category);
   }
 
