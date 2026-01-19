@@ -1,26 +1,25 @@
 import { prisma } from '../lib/prisma.js';
 
-export class CategoryService {
+export class PaymentMethodService {
   async findAll(userId: number) {
-    return await prisma.category.findMany({
+    return await prisma.paymentMethod.findMany({
       where: { userId },
       orderBy: { name: 'asc' },
     });
   }
 
   async create(userId: number, name: string) {
-    return await prisma.category.create({
+    return await prisma.paymentMethod.create({
       data: {
         name,
         userId,
       },
     });
   }
-
-  async deleteById(userId: number, categoryId: number) {
-    return await prisma.category.deleteMany({
+  async deleteById(userId: number, paymentMethodId: number) {
+    return await prisma.paymentMethod.deleteMany({
       where: {
-        id: categoryId,
+        id: paymentMethodId,
         userId,
       },
     });

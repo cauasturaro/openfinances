@@ -4,7 +4,7 @@ import { CategoryService } from '../services/category.service.js';
 export class CategoryController {
   async index(req: Request, res: Response) {
     const categoryService = new CategoryService();
-    const userId = Number(req.headers['userid']) || 1; 
+    const userId = req.user.id;
 
     const categories = await categoryService.findAll(userId);
     return res.json(categories);
@@ -12,10 +12,19 @@ export class CategoryController {
 
   async create(req: Request, res: Response) {
     const categoryService = new CategoryService();
-    const userId = Number(req.headers['userid']) || 1;
+    const userId = req.user.id;
     const { name } = req.body;
 
     const category = await categoryService.create(userId, name);
     return res.status(201).json(category);
+  }
+
+  async delete(req: Request, res: Response) {
+    const categoryService = new CategoryService();
+    const userId = req.user.id;
+    const categoryId = parseInt(req.params.id, 10);
+
+    await categoryService.deleteById(userId, categoryId);
+    return res.status(204).send();
   }
 }

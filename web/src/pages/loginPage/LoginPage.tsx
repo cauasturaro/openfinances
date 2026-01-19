@@ -35,9 +35,11 @@ export default function LoginPage() {
         const password = formData.get('password') as string;
 
         try {
-            await UserService.login({ email, password, rememberMe });
+            const response = await UserService.login({ email, password, rememberMe });
+            localStorage.setItem('token', response.token);
+            localStorage.setItem('user', JSON.stringify(response.user));
             login();
-            navigate('/dashboard'); 
+            navigate('/dashboard');
         } catch (err: any) {
             if (isAxiosError(err) && err.response) {
                 const backendError = err.response.data;

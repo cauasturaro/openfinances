@@ -33,8 +33,27 @@ export const TransactionService = {
     return await api.post('/transactions', data);
   },
 
+  calculateSummary: (transactions: Transaction[]): DashboardSummary => {
+     let income = 0;
+     let expense = 0;
+     transactions.forEach(t => {
+       if (t.amount > 0) income += t.amount;
+       else expense += Math.abs(t.amount);
+     });
+     return { income, expense, balance: income - expense };
+  },
+
+  deleteTransaction: async (id: number) => {
+    await api.delete(`/transactions/${id}`);
+  },
+
   getCategories: async () => {
     const response = await api.get<{id: number, name: string}[]>('/categories');
+    return response.data;
+  },
+
+  createCategory: async (name: string) => {
+    const response = await api.post('/categories', { name });
     return response.data;
   },
 
@@ -42,20 +61,17 @@ export const TransactionService = {
     const response = await api.get<{id: number, name: string}[]>('/payment-methods'); 
     return response.data;
   },
-  
-  calculateSummary: (transactions: Transaction[]): DashboardSummary => {
-    let income = 0;
-    let expense = 0;
 
-    transactions.forEach(t => {
-      if (t.amount > 0) income += t.amount;
-      else expense += Math.abs(t.amount);
-    });
+  createPaymentMethod: async (name: string) => {
+    const response = await api.post('/payment-methods', { name });
+    return response.data;
+  },
 
-    return {
-      income,
-      expense,
-      balance: income - expense
-    };
-  }
+  deleteCategory: async (id: number) => {
+    await api.delete(`/categories/${id}`);
+  },
+
+  deletePaymentMethod: async (id: number) => {
+    await api.delete(`/payment-methods/${id}`);
+  },
 };
