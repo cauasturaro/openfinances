@@ -5,6 +5,7 @@ import { UserService } from '@/services/UserService';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox"; 
 import {
   Card,
   CardContent,
@@ -17,6 +18,8 @@ import {
 export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [rememberMe, setRememberMe] = useState(false); 
+    
     const navigate = useNavigate();
 
     const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -29,7 +32,7 @@ export default function LoginPage() {
         const password = formData.get('password') as string;
 
         try {
-            await UserService.login({ email, password });
+            await UserService.login({ email, password, rememberMe });
             navigate('/dashboard'); 
         } catch (err: any) {
             if (isAxiosError(err) && err.response) {
@@ -80,6 +83,21 @@ export default function LoginPage() {
                                 required 
                             />
                         </div>
+
+                        <div className="flex items-center space-x-2">
+                            <Checkbox 
+                                id="remember" 
+                                checked={rememberMe}
+                                onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                            />
+                            <Label 
+                                htmlFor="remember" 
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                            >
+                                Remember me for 30 days
+                            </Label>
+                        </div>
+
                         {error && (
                             <div className="text-sm text-red-500 font-medium bg-red-50 dark:bg-red-900/20 p-3 rounded-md border border-red-200 dark:border-red-800">
                                 {error}

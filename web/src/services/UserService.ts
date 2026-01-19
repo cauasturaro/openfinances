@@ -3,6 +3,7 @@ import { api } from "@/lib/api";
 export interface LoginRequest {
   email: string;
   password: string;
+  rememberMe?: boolean;
 }
 
 export interface RegisterRequest {
