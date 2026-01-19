@@ -5,17 +5,16 @@ import {
   startOfWeek, endOfWeek, eachWeekOfInterval, eachMonthOfInterval, 
   startOfYear, endOfYear, getWeek, isSameWeek, getYear, isSameMonth
 } from "date-fns";
-
 import { TransactionService, type Transaction, type DashboardSummary } from "@/services/TransactionService";
 import { CreateTransactionDialog } from "@/components/dashboard/CreateTransactionDialog"; 
 import { ManageDataDialog } from "@/components/dashboard/ManageDataDialog";
-import { TransactionDetailsDialog } from "@/components/dashboard/TransactionDetailsDialog";
+import { TransactionDetailsDialog } from "@/components/dashboard/TransactionDetailsDialog"; 
 import { useAuth } from "@/contexts/AuthContext";
 
 // UI Components
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -31,12 +30,20 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGri
 type Scope = "week" | "month" | "year";
 type Granularity = "day" | "week" | "month";
 
+interface UserData {
+  name: string;
+  email: string;
+}
+
 export default function DashboardPage() {
   const navigate = useNavigate();
   const { logout } = useAuth();
 
   const [loading, setLoading] = useState(true);
   
+  // --- USER DATA (NOVO) ---
+  const [user, setUser] = useState<UserData | null>(null);
+
   // --- DADOS ---
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<{id: number, name: string}[]>([]);
@@ -72,7 +79,17 @@ export default function DashboardPage() {
     }
   };
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => { 
+    loadData();
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error("Failed to parse user data");
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (chartScope === "week") setChartGranularity("day");
@@ -103,6 +120,14 @@ export default function DashboardPage() {
     localStorage.removeItem('user');
     logout(); 
     navigate("/login");
+  };
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
   };
 
   const chartData = useMemo(() => {
@@ -172,17 +197,26 @@ export default function DashboardPage() {
           <div className="flex items-center gap-3">
             <ManageDataDialog categories={categories} paymentMethods={paymentMethods} onUpdate={loadData} />
             <CreateTransactionDialog onSuccess={loadData} categories={categories} paymentMethods={paymentMethods} onDataUpdate={loadData} />
+            
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full border border-zinc-200 hover:bg-zinc-100">
                   <Avatar className="h-9 w-9">
-                    <AvatarImage src="" />
-                    <AvatarFallback><UserIcon /></AvatarFallback>
+                    <AvatarFallback className="bg-emerald-100 text-emerald-700 font-medium">
+                      {user ? getInitials(user.name) : <UserIcon className="h-4 w-4" />}
+                    </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{user?.name || 'Account'}</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user?.email || 'Loading...'}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer focus:text-red-600">
                   <LogOut className="mr-2 h-4 w-4" />
