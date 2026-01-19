@@ -15,11 +15,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+import { useAuth } from "@/contexts/AuthContext";
+
 export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [rememberMe, setRememberMe] = useState(false); 
     
+    const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -33,6 +36,7 @@ export default function LoginPage() {
 
         try {
             await UserService.login({ email, password, rememberMe });
+            login();
             navigate('/dashboard'); 
         } catch (err: any) {
             if (isAxiosError(err) && err.response) {
