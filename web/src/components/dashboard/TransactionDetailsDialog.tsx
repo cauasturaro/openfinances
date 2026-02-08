@@ -26,7 +26,7 @@ export function TransactionDetailsDialog({
   const [isDeleting, setIsDeleting] = useState(false);
 
   if (!transaction) return null;
-
+  // HANDLER DE DELETE
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
@@ -40,6 +40,7 @@ export function TransactionDetailsDialog({
     }
   };
 
+  // FORMATAÇÃO DO VALOR
   const isIncome = transaction.amount > 0;
   const formattedAmount = new Intl.NumberFormat('en-US', { 
     style: 'currency', currency: 'USD' 
@@ -49,6 +50,7 @@ export function TransactionDetailsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-105 p-0 gap-0 overflow-hidden border-0 shadow-2xl">
         
+        {/*ÍCONE DE SETA*/}
         <div className={cn(
           "px-6 py-8 flex flex-col items-center justify-center gap-4 bg-linear-to-b",
           isIncome 
@@ -65,9 +67,11 @@ export function TransactionDetailsDialog({
           </div>
 
           <div className="text-center space-y-1">
+            {/*DESCRIÇÃO*/}
             <DialogTitle className="text-xl font-normal text-muted-foreground">
               {transaction.description}
             </DialogTitle>
+            {/*VALOR*/}
             <div className={cn(
               "text-4xl font-bold tracking-tighter",
               isIncome ? "text-emerald-600 dark:text-emerald-500" : "text-red-600 dark:text-red-500"
@@ -80,13 +84,17 @@ export function TransactionDetailsDialog({
         <div className="px-6 py-2 pb-6 space-y-4">
           <div className="rounded-xl border border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 p-4 space-y-4">
 
+            {/*DATA*/}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 text-muted-foreground">
+                {/*ícone*/}
                 <div className="p-2 bg-white dark:bg-zinc-800 rounded-md shadow-sm">
                   <Calendar className="h-4 w-4" />
                 </div>
+                {/*texto*/}
                 <span className="text-sm font-medium">Date</span>
               </div>
+              {/*data*/}
               <span className="text-sm text-zinc-900 dark:text-zinc-100 font-medium">
                 {format(new Date(transaction.date), "MMMM dd, yyyy", { locale: enUS })}
               </span>
@@ -94,6 +102,7 @@ export function TransactionDetailsDialog({
             
             <Separator className="bg-zinc-200 dark:bg-zinc-800" />
 
+            {/*CATEGORIA*/}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 text-muted-foreground">
                 <div className="p-2 bg-white dark:bg-zinc-800 rounded-md shadow-sm">
@@ -113,6 +122,7 @@ export function TransactionDetailsDialog({
 
             <Separator className="bg-zinc-200 dark:bg-zinc-800" />
 
+            {/*MÉTODO DE PAGAMENTO*/}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 text-muted-foreground">
                 <div className="p-2 bg-white dark:bg-zinc-800 rounded-md shadow-sm">
@@ -127,8 +137,10 @@ export function TransactionDetailsDialog({
           </div>
         </div>
 
+        {/*BOTÕES DO FOOTER*/}
         <div className="px-6 py-4 bg-zinc-50 dark:bg-zinc-900 border-t border-zinc-100 dark:border-zinc-800 flex justify-between items-center">
-
+          
+          {/*DELETE*/}
           <Button
             variant="ghost"
             size="sm"
@@ -143,7 +155,8 @@ export function TransactionDetailsDialog({
             )}
             <span className="text-xs font-semibold uppercase tracking-wider">Delete</span>
           </Button>
-
+          
+          {/*CLOSE*/}
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}

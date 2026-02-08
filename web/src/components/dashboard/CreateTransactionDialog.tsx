@@ -1,10 +1,14 @@
+// REACT
 import { useState } from "react";
+// SERVICE
 import { TransactionService } from "@/services/TransactionService";
+// LUCIDE-REACT
 import { CalendarIcon, Loader2, PlusCircle, Plus } from "lucide-react";
+// OUTROS
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-
+// COMPONENTS
 import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
@@ -16,8 +20,10 @@ import {
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+// DIALOGS
 import { ManageDataDialog } from "./ManageDataDialog";
 
+// PROPS DESSE COMPONENTE
 interface CreateTransactionDialogProps {
   onSuccess: () => void;
   categories: { id: number; name: string, color: string }[];
@@ -39,6 +45,7 @@ export function CreateTransactionDialog({ onSuccess, categories, paymentMethods,
   const [categoryId, setCategoryId] = useState("");
   const [paymentMethodId, setPaymentMethodId] = useState("");
 
+  // HANDLER DE CRIAR TRANSAÇÃO (SUBMIT)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!date || !amount || !categoryId || !paymentMethodId) return;
@@ -65,6 +72,7 @@ export function CreateTransactionDialog({ onSuccess, categories, paymentMethods,
     }
   };
 
+  // ESTADO DEFAULT 
   const resetForm = () => {
     setDescription("");
     setAmount("");
@@ -74,13 +82,17 @@ export function CreateTransactionDialog({ onSuccess, categories, paymentMethods,
     setPaymentMethodId("");
   };
 
+  // HANDLER DE ABRIR COMPONENTE QUE CRIA LABELS DE CATEGORIA OU FORMA DE PAGAMENTO
   const handleOpenManage = (tab: "categories" | "payment-methods") => {
     setManageTab(tab);
     setManageOpen(true);
   };
 
+  // PARA EVITAR QUE ALGO ALÉM DE NÚMEROS SEJA DIGITADO 
   const handleAmountKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (["e", "E", "+", "-"].includes(e.key)) {
+
+    const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft','ArrowRight'];
+    if ((e.key > '9' || e.key < '0') && !allowedKeys.includes(e.key)) {
       e.preventDefault();
     }
   };
@@ -88,13 +100,16 @@ export function CreateTransactionDialog({ onSuccess, categories, paymentMethods,
   return (
     <>
       <Dialog open={open} onOpenChange={setOpen}>
+        {/*BOTÃO PARA ABRIR O DIALOG*/}
         <DialogTrigger asChild>
           <Button className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-md hover:shadow-lg transition-all">
             <PlusCircle className="h-4 w-4" />
             New Transaction
           </Button>
         </DialogTrigger>
+
         <DialogContent className="sm:max-w-125">
+          {/*HEADER*/}
           <DialogHeader>
             <DialogTitle>New Transaction</DialogTitle>
             <DialogDescription>
@@ -102,8 +117,11 @@ export function CreateTransactionDialog({ onSuccess, categories, paymentMethods,
             </DialogDescription>
           </DialogHeader>
 
+          {/*FORMULÁRIO PARA CRIAÇÃO DE TRANSAÇÃO*/}
           <form onSubmit={handleSubmit} className="grid gap-6 py-4">
+            {/*BOTÕES DE INCOME E EXPENSE*/}
             <div className="grid grid-cols-2 gap-4 p-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-xl">
+                {/*INCOME*/}
                <button
                  type="button"
                  onClick={() => setType('income')}
@@ -116,6 +134,8 @@ export function CreateTransactionDialog({ onSuccess, categories, paymentMethods,
                >
                  <ArrowUpIcon className="h-4 w-4" /> Income
                </button>
+
+               {/*EXPENSE*/}
                <button
                  type="button"
                  onClick={() => setType('expense')}
@@ -130,6 +150,7 @@ export function CreateTransactionDialog({ onSuccess, categories, paymentMethods,
                </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/*DESCRIÇÃO*/}
               <div className="grid gap-2">
                 <Label htmlFor="description">Description</Label>
                 <Input 
@@ -141,7 +162,7 @@ export function CreateTransactionDialog({ onSuccess, categories, paymentMethods,
                   className="h-11"
                 />
               </div>
-              
+              {/*VALOR*/}
               <div className="grid gap-2">
                 <Label htmlFor="amount">Amount</Label>
                 <div className="relative">
@@ -167,6 +188,7 @@ export function CreateTransactionDialog({ onSuccess, categories, paymentMethods,
                 </div>
               </div>
             </div>
+            {/*CALENDÁRIO - SELEÇÃO DE DATA*/}
             <div className="grid gap-2">
               <Label>Date</Label>
               <Popover>
@@ -209,7 +231,10 @@ export function CreateTransactionDialog({ onSuccess, categories, paymentMethods,
                 </PopoverContent>
               </Popover>
             </div>
+
+            {/*CATEGORIA E MÉTODO DE PAGAMENTO*/}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/*CATEGORIA*/}
               <div className="grid gap-2">
                 <Label>Category</Label>
                 <div className="flex gap-2">
@@ -236,6 +261,7 @@ export function CreateTransactionDialog({ onSuccess, categories, paymentMethods,
                 </div>
               </div>
 
+              {/*MÉTODO DE PAGAMENTO*/}
               <div className="grid gap-2">
                 <Label>Payment Method</Label>
                 <div className="flex gap-2">
@@ -262,7 +288,8 @@ export function CreateTransactionDialog({ onSuccess, categories, paymentMethods,
                 </div>
               </div>
             </div>
-
+            
+            {/*CONFIRMAR TRANSAÇÃO*/}
             <DialogFooter className="mt-6">
               <Button type="submit" className="w-full h-12 text-lg font-medium shadow-md" disabled={loading}>
                 {loading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
@@ -273,6 +300,7 @@ export function CreateTransactionDialog({ onSuccess, categories, paymentMethods,
         </DialogContent>
       </Dialog>
 
+      {/*DIALOG DE GERENCIAR LABELS*/}
       <ManageDataDialog 
         open={manageOpen} 
         onOpenChange={setManageOpen} 
@@ -286,6 +314,7 @@ export function CreateTransactionDialog({ onSuccess, categories, paymentMethods,
   );
 }
 
+{/*ÍCONES*/}
 function ArrowUpIcon(props: any) {
   return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
 }

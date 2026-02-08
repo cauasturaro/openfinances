@@ -59,8 +59,10 @@ export default function DashboardPage() {
   // Filtros
   const [chartScope, setChartScope] = useState<Scope>("month"); 
   const [chartGranularity, setChartGranularity] = useState<Granularity>("day");
-  const [chartType, setChartType] = useState("overview"); 
+  const [chartType, setChartType] = useState("balance"); 
 
+
+  // CARREGANDO DADOS
   const loadData = async () => {
     try {
       const [transData, catData, payData] = await Promise.all([
@@ -80,6 +82,7 @@ export default function DashboardPage() {
     }
   };
 
+  // SETANDO USUÁRIO
   useEffect(() => { 
     loadData();
     const storedUser = localStorage.getItem('user');
@@ -92,17 +95,20 @@ export default function DashboardPage() {
     }
   }, []);
 
+  // ESCOPO DO GRÁFICO (e granularidade default)
   useEffect(() => {
     if (chartScope === "week") setChartGranularity("day");
     if (chartScope === "month") setChartGranularity("day");
     if (chartScope === "year") setChartGranularity("month");
   }, [chartScope]);
 
+  // HANDLER DE CRIAR TRANSAÇÃO
   const handleTransactionClick = (transaction: Transaction) => {
     setSelectedTransaction(transaction);
     setDetailsOpen(true);
   };
 
+  // HANDLER DE DELETAR TRANSAÇÃO
   const handleDeleteFromList = async (e: React.MouseEvent, id: number) => {
     e.stopPropagation(); 
     setDeletingId(id);
@@ -116,6 +122,7 @@ export default function DashboardPage() {
     }
   };
 
+  // HANDLER DE LOGOUT
   const handleLogout = () => {
     localStorage.removeItem('token'); 
     localStorage.removeItem('user');
@@ -123,6 +130,7 @@ export default function DashboardPage() {
     navigate("/login");
   };
 
+  // FUNÇÃO PARA PEGAR INICIAIS DO NOME DE USUÁRIO
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -132,34 +140,38 @@ export default function DashboardPage() {
       .toUpperCase();
   };
 
+  // GRÁFICO (dados)
   const chartData = useMemo(() => {
     if (transactions.length === 0) return [];
-    const today = new Date();
+
+    const today = new Date(); 
     let start, end;
     let dataPoints: Date[] = [];
 
+    // SETANDO ESCOPO
     if (chartScope === 'week') { start = startOfWeek(today, { weekStartsOn: 1 }); end = endOfWeek(today, { weekStartsOn: 1 }); }
     else if (chartScope === 'month') { start = startOfMonth(today); end = endOfMonth(today); }
     else { start = startOfYear(today); end = endOfYear(today); }
 
+    // AO SETAR GRANULARIDADE MANUALMENTE
     if (chartGranularity === 'day') dataPoints = eachDayOfInterval({ start, end });
     else if (chartGranularity === 'week') dataPoints = eachWeekOfInterval({ start, end }, { weekStartsOn: 1 });
     else dataPoints = eachMonthOfInterval({ start, end });
 
-    return dataPoints.map((point) => {
+    return dataPoints.map((point) => { 
       let label = "";
       let fullDateLabel = "";
-      const bucketTransactions = transactions.filter(t => {
-        const tDate = new Date(t.date);
-        if (chartGranularity === 'day') {
+      const bucketTransactions = transactions.filter(t => { 
+        const tDate = new Date(t.date); // FILTRA E DEFINE LABELS DE TRANSAÇÕES DE ACORDO COM A GRANULARIDADE (dia, semana ou mês)
+        if (chartGranularity === 'day') { // DIA
            label = format(point, 'dd');
            fullDateLabel = format(point, 'MMM dd, yyyy');
            return isSameDay(tDate, point);
-        } else if (chartGranularity === 'week') {
+        } else if (chartGranularity === 'week') { // SEMANA
            label = `W${getWeek(point, { weekStartsOn: 1 })}`;
            fullDateLabel = `Week ${getWeek(point)}`;
            return isSameWeek(tDate, point, { weekStartsOn: 1 }) && getYear(tDate) === getYear(point);
-        } else { 
+        } else { // ANO
            label = format(point, 'MMM');
            fullDateLabel = format(point, 'MMMM yyyy');
            return isSameMonth(tDate, point);
@@ -168,10 +180,12 @@ export default function DashboardPage() {
 
       let income = 0;
       let expense = 0;
+      // SETANDO VALORES DE INCOME E EXPENSE
       bucketTransactions.forEach(t => {
         if (t.amount > 0) income += t.amount; else expense += Math.abs(t.amount);
       });
-
+      
+      // RETORNO FINAL COM INFORMAÇÕES TOTAIS
       return {
         name: label,
         fullDate: fullDateLabel,
@@ -182,11 +196,13 @@ export default function DashboardPage() {
     });
   }, [transactions, chartScope, chartGranularity, chartType]);
 
+  // FORMATANDO DATA E MOEDA
   const formatCurrency = (val: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val);
   const formatDate = (date: string) => new Date(date).toLocaleDateString('en-US', { day: '2-digit', month: 'short' });
 
   return (
     <div className="min-h-screen bg-zinc-50/50 dark:bg-zinc-950 font-sans pb-20">
+      {/*HEADER*/}
       <header className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 sticky top-0 z-20 shadow-sm">
         <div className="container mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -197,10 +213,14 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <ManageDataDialog categories={categories} paymentMethods={paymentMethods} onUpdate={loadData} trigger={<span className="hidden" />} />
+            {/*BOTÃO DE GERENCIAR RÓTULOS*/}
+            <ManageDataDialog categories={categories} paymentMethods={paymentMethods} onUpdate={loadData} />
+            {/*BOTÃO DO DIÁLOGO DE CRIAR TRANSAÇÃO*/}
             <CreateTransactionDialog onSuccess={loadData} categories={categories} paymentMethods={paymentMethods} onDataUpdate={loadData} />
             
+            {/*INFORMAÇÕES DO USUÁRIO + botão de sair*/}
             <DropdownMenu>
+              {/*AVATAR CLICÁVEL COM DROPDOWN*/}
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full border border-zinc-200 hover:bg-zinc-100">
                   <Avatar className="h-9 w-9">
@@ -211,6 +231,7 @@ export default function DashboardPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end">
+                {/*NOME + EMAIL*/}
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">{user?.name || 'User'}</p>
@@ -218,6 +239,7 @@ export default function DashboardPage() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                {/*LOGOUT*/}
                 <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer focus:text-red-600">
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign Out
@@ -227,9 +249,13 @@ export default function DashboardPage() {
           </div>
         </div>
       </header>
+
+      {/*CONTEÚDO CENTRAL*/}
       <main className="container mx-auto px-4 md:px-6 py-8 space-y-8">
         
+        {/*TOTAL BALANCE, INCOME E EXPENSES*/}
         <div className="grid gap-6 md:grid-cols-3">
+          {/*BALANCE*/}
           <Card className="border-l-4 border-l-emerald-500 shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Total Balance</CardTitle>
@@ -243,6 +269,8 @@ export default function DashboardPage() {
               )}
             </CardContent>
           </Card>
+            
+          {/*INCOME*/}
           <Card className="shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Total Income</CardTitle>
@@ -254,6 +282,8 @@ export default function DashboardPage() {
               )}
             </CardContent>
           </Card>
+          
+          {/*EXPENSES*/}
           <Card className="shadow-sm hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Total Expenses</CardTitle>
@@ -268,10 +298,14 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-7">
+          {/*----- GRÁFICO -----*/}
           <Card className="col-span-4 shadow-sm h-full flex flex-col min-h-100">
+            {/* HEADER DO GRÁFICO */}
             <CardHeader>
               <div className="flex flex-col gap-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+
+                  {/*TÍTULO*/}
                   <div>
                     <CardTitle className="text-lg font-semibold flex items-center gap-2">
                       <TrendingUp className="h-5 w-5 text-zinc-500" />
@@ -279,6 +313,8 @@ export default function DashboardPage() {
                     </CardTitle>
                     <CardDescription>Visualizing your finances</CardDescription>
                   </div>
+
+                  {/*FILTRO DE ESCOPO*/}
                   <Select value={chartScope} onValueChange={(v) => setChartScope(v as Scope)}>
                     <SelectTrigger className="w-35"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -287,8 +323,10 @@ export default function DashboardPage() {
                       <SelectItem value="year">This Year</SelectItem>
                     </SelectContent>
                   </Select>
+
                 </div>
 
+                {/*FILTRO DE GRANULARIDADE*/}
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                    <Filter className="h-3 w-3" /> <span>View by:</span>
                    <div className="flex gap-1">
@@ -304,22 +342,31 @@ export default function DashboardPage() {
                 </div>
               </div>
             </CardHeader>
+            
+            {/*CONTEÚDO CENTRAL DO GRÁFICO*/}
             <CardContent className="flex-1 min-h-75">
-              <Tabs defaultValue="overview" className="w-full h-full flex flex-col" onValueChange={setChartType}>
+              <Tabs defaultValue="balance" className="w-full h-full flex flex-col" onValueChange={setChartType}>
+                {/*SELEÇÃO DE VISUALIZAÇÃO (BALANCE, INCOME, EXPENSES)*/}
                 <TabsList className="grid w-full grid-cols-3 mb-4">
-                  <TabsTrigger value="overview">Balance</TabsTrigger>
+                  <TabsTrigger value="balance">Balance</TabsTrigger>
                   <TabsTrigger value="income" className="data-[state=active]:text-emerald-600">Income</TabsTrigger>
                   <TabsTrigger value="expense" className="data-[state=active]:text-red-600">Expenses</TabsTrigger>
                 </TabsList>
+
+                {/*GRÁFICO EM SI*/}
                 <div className="flex-1 w-full min-h-62.5">
                   <ResponsiveContainer width="100%" height="100%">
+                    {/*VELAS DO GRÁFICO*/}
                     <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      {/*GRID X (TEMPO) E Y (VALOR)*/}
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E4E4E7" />
                       <XAxis dataKey="name" stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} dy={10} />
                       <YAxis stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
+
+                      {/*TOOLTIP (HOVER)*/}  
                       <Tooltip 
-                        cursor={{fill: '#f4f4f5'}}
-                        content={({ active, payload }) => {
+                        cursor={{fill: '#f4f4f5'}} // COR DE FUNDO DA VELA NO HOVER
+                        content={({ active, payload }) => { 
                           if (active && payload && payload.length) {
                              const data = payload[0].payload;
                              return (
@@ -345,9 +392,10 @@ export default function DashboardPage() {
                           return null;
                         }}
                       />
-                      {chartType === 'overview' && <Bar dataKey="balance" fill="#3f3f46" radius={[4, 4, 4, 4]} barSize={20} />}
-                      {chartType === 'income' && <Bar dataKey="income" fill="#10b981" radius={[4, 4, 0, 0]} barSize={20} />}
-                      {chartType === 'expense' && <Bar dataKey="expense" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={20} />}
+                      {/*SETTER DE CORES DAS VELAS DE ACORDDO COM TIPO*/}
+                      {chartType === 'balance' && <Bar dataKey="balance" fill="#3f3f46" radius={[4, 4, 4, 4]} barSize={40} />}
+                      {chartType === 'income' && <Bar dataKey="income" fill="#10b981" radius={[4, 4, 0, 0]} barSize={40} />}
+                      {chartType === 'expense' && <Bar dataKey="expense" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={40} />}
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -355,14 +403,19 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
+          {/*----- HISTÓRICO -----*/}
           <Card className="col-span-4 md:col-span-3 shadow-sm h-full flex flex-col">
+            {/*HEADER*/}
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <CalendarIcon className="h-5 w-5 text-zinc-500" />
                 History
               </CardTitle>
             </CardHeader>
+
+            {/*CONTEÚDO PRINCIPAL*/}
             <CardContent className="flex-1 overflow-auto pr-1 max-h-125">
+              {/*NO LOADING, FICA 3 TRAÇOS VAZIOS DE TRANSAÇÃO NO INTERIOR DO CARD*/}
               {loading ? (
                  <div className="space-y-4">
                    <Skeleton className="h-14 w-full rounded-xl" />
@@ -371,22 +424,28 @@ export default function DashboardPage() {
                  </div>
               ) : (
                 <div className="space-y-2">
-                  {transactions.slice(0, 10).map((transaction) => (
+                  {/*EXIBIÇÃO DE TRANSAÇÕES*/}
+                  {transactions.map((transaction) => (
+                    // SET DE KEY E onClick
                     <div 
                       key={transaction.id} 
                       onClick={() => handleTransactionClick(transaction)}
                       className="group flex items-center justify-between p-3 bg-white hover:bg-zinc-50 rounded-xl border border-zinc-100 transition-all hover:shadow-sm cursor-pointer active:scale-[0.98] gap-3"
                     >
-
+                      {/*TRANSAÇÃO EM SI*/}
                       <div className="flex items-center gap-3 overflow-hidden">
+                        {/*ÍCONE DE SETA DE ACORDO COM O VALOR*/}
                         <div className={`shrink-0 h-10 w-10 rounded-full flex items-center justify-center ${transaction.amount > 0 ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'}`}>
                           {transaction.amount > 0 ? <ArrowUpRight className="h-5 w-5" /> : <ArrowDownLeft className="h-5 w-5" />}
                         </div>
-                        
+
                         <div className="flex flex-col min-w-0">
+                          {/*DESCRIÇÃO (TÍTULO)*/}
                           <span className="font-semibold text-sm text-zinc-900 truncate">
                             {transaction.description}
                           </span>
+
+                          {/*CATEGORIA E MÉTODO DE PAGAMENTO*/}
                           <div className="flex items-center gap-1.5 text-xs text-muted-foreground truncate">
                              <Badge 
                                 variant="outline" 
@@ -405,7 +464,9 @@ export default function DashboardPage() {
                         </div>
                       </div>
 
+                      {/*DIREITA DA TRANSAÇÃO*/}
                       <div className="flex items-center gap-3 shrink-0">
+                        {/*VALOR E DATA DA TRANSAÇÃO*/} 
                         <div className="text-right">
                             <div className={`font-bold text-sm ${transaction.amount < 0 ? 'text-red-600' : 'text-emerald-600'}`}>
                               {transaction.amount > 0 ? '+' : ''} {formatCurrency(transaction.amount)}
@@ -415,6 +476,7 @@ export default function DashboardPage() {
                             </span>
                         </div>
 
+                        {/*BOTÃO DE DELETAR NO HOVER*/}
                         <div className="hidden sm:block w-8">
                           <Button
                               variant="ghost"
@@ -430,6 +492,7 @@ export default function DashboardPage() {
                     </div>
                   ))}
                   
+                  {/*CASO NÃO HAJA TRANSAÇÃO NENHUMA*/}
                   {transactions.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-12 text-center space-y-3">
                       <div className="h-12 w-12 bg-zinc-100 rounded-full flex items-center justify-center">
@@ -449,6 +512,7 @@ export default function DashboardPage() {
         </div>
       </main>
 
+      {/*DIALOG DE DETALHES DE TRANSAÇÃO*/}
       <TransactionDetailsDialog 
         transaction={selectedTransaction}
         open={detailsOpen}

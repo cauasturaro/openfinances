@@ -1,6 +1,10 @@
+// REACT
 import { useState, useEffect } from "react";
+// SERVICES
 import { TransactionService } from "@/services/TransactionService";
+// LUCIDE REACT
 import { Loader2, Plus, Tag, CreditCard, Trash2, AlertCircle, Check } from "lucide-react";
+// COMPONENTES
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -15,6 +19,7 @@ const COLORS = [
   "#06b6d4", "#3b82f6", "#6366f1", "#a855f7", "#ec4899", "#71717a",
 ];
 
+// PROPS PARA LISTAR ITENS
 interface RemovableItemProps {
   id: number;
   name: string;
@@ -23,9 +28,11 @@ interface RemovableItemProps {
   onDelete: (id: number) => Promise<void>;
 }
 
+// ITEM
 function RemovableItem({ id, name, color, icon, onDelete }: RemovableItemProps) {
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // HANDLER DE DELETAR ITEM 
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
@@ -36,9 +43,11 @@ function RemovableItem({ id, name, color, icon, onDelete }: RemovableItemProps) 
     }
   };
 
+  // ITEM
   return (
     <div className="group flex items-center justify-between p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all shadow-sm mb-2 last:mb-0">
       <div className="flex items-center gap-3 overflow-hidden">
+        {/*ÍCONE*/} 
         <div 
           className={cn(
             "p-2 rounded-md transition-colors shadow-sm",
@@ -48,11 +57,12 @@ function RemovableItem({ id, name, color, icon, onDelete }: RemovableItemProps) 
         >
           {icon}
         </div>
+        {/*DESCRIÇÃO*/} 
         <span className="text-sm font-medium truncate text-zinc-700 dark:text-zinc-300">
           {name}
         </span>
       </div>
-      
+      {/*BOTÃO DE DELETAR*/} 
       <Button
         variant="ghost"
         size="icon"
@@ -70,7 +80,7 @@ function RemovableItem({ id, name, color, icon, onDelete }: RemovableItemProps) 
     </div>
   );
 }
-
+ // PROPS DO DIALOG
 interface ManageDataDialogProps {
   categories: { id: number; name: string; color: string }[];
   paymentMethods: { id: number; name: string }[]; 
@@ -100,12 +110,14 @@ export function ManageDataDialog({
   const [selectedColor, setSelectedColor] = useState(COLORS[4]); 
   const [activeTab, setActiveTab] = useState(defaultTab);
 
+  // SETTER DE TAB
   useEffect(() => {
     if (showOpen) {
       setActiveTab(defaultTab);
     }
   }, [showOpen, defaultTab]);
 
+  // CRIAR NOVO ITEM (CATEGORIA OU MÉTODO DE PAGAMENTO)
   const handleCreate = async () => {
     if (!newItemName.trim()) return;
     setLoading(true);
@@ -124,11 +136,13 @@ export function ManageDataDialog({
     }
   };
 
+  // HANDLER DE DELETAR CATEGORIA
   const handleDeleteCategory = async (id: number) => {
     await TransactionService.deleteCategory(id);
     onUpdate();
   };
 
+  // HANDLER DE DELETAR MÉTODO DE PAGAMENTO
   const handleDeletePaymentMethod = async (id: number) => {
     await TransactionService.deletePaymentMethod(id);
     onUpdate();
@@ -136,6 +150,7 @@ export function ManageDataDialog({
 
   return (
     <Dialog open={showOpen} onOpenChange={setShowOpen}>
+      {/*BOTÃO PARA ABRIR DIALOG (TRIGGER -> PARA NEW TRANSACTIONS OU DEFAULT)*/}
       <DialogTrigger asChild>
         {trigger || (
           <Button variant="outline" size="sm" className="gap-2 bg-white dark:bg-zinc-900 border-dashed hover:border-solid transition-all">
@@ -144,7 +159,9 @@ export function ManageDataDialog({
           </Button>
         )}
       </DialogTrigger>
+
       <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden">
+        {/*HEADER*/}
         <div className="p-6 pb-4">
             <DialogHeader>
             <DialogTitle>Manage Classifications</DialogTitle>
@@ -154,12 +171,14 @@ export function ManageDataDialog({
             </DialogHeader>
         </div>
 
+        {/*SETTER DE TABS*/}
         <Tabs 
           defaultValue={defaultTab} 
           value={activeTab} 
           onValueChange={(v) => setActiveTab(v as any)} 
           className="w-full"
         >
+          {/*LISTA DE TABS*/}
           <div className="px-6 border-b border-zinc-100 dark:border-zinc-800">
             <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="categories">Categories</TabsTrigger>
@@ -167,9 +186,11 @@ export function ManageDataDialog({
             </TabsList>
           </div>
           
+          {/*SECÇÃO DE CRIAÇÃO DE FATO*/}
           <div className="p-6 pt-4 bg-zinc-50/50 dark:bg-black/20 flex flex-col">
             <div className="flex flex-col gap-3 mb-6">
                 <div className="flex gap-2">
+                    {/*TÍTULO*/}  
                     <Input 
                         placeholder={`New ${activeTab === 'categories' ? 'Category' : 'Method'} name...`}
                         value={newItemName}
@@ -177,6 +198,7 @@ export function ManageDataDialog({
                         onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
                         className="h-10 bg-white dark:bg-zinc-900 shadow-sm"
                     />
+                    {/*BOTÃO DE CRIAR*/}
                     <Button 
                         onClick={handleCreate} 
                         disabled={loading || !newItemName.trim()} 
@@ -186,7 +208,7 @@ export function ManageDataDialog({
                         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-5 w-5" />}
                     </Button>
                 </div>
-
+                {/*CORES CASO SEJA A ABA DE CATEGORIAS*/}
                 {activeTab === 'categories' && (
                   <div className="flex flex-wrap gap-2 justify-start animate-in fade-in slide-in-from-top-1 duration-200">
                       {COLORS.map((color) => (
@@ -207,7 +229,8 @@ export function ManageDataDialog({
                   </div>
                 )}
             </div>
-
+            
+            {/*LISTAGEM DE ITENS JÁ EXISTENTES*/}
             <div className="flex items-center gap-2 mb-3 px-1">
                 <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
                     Existing Items
@@ -216,9 +239,11 @@ export function ManageDataDialog({
                     {activeTab === 'categories' ? categories.length : paymentMethods.length}
                 </span>
             </div>
-
+            
+            {/*LISTAGEM DE FATO*/}
             <ScrollArea className="h-75 w-full pr-4 rounded-md border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900/30">
                 <div className="p-3">
+                {/*CATEGORIAS OU MÉTODOS DE PAGAMENTO*/}
                 {activeTab === 'categories' ? (
                     categories.length === 0 ? (
                         <EmptyState message="No categories created yet." />
@@ -258,6 +283,7 @@ export function ManageDataDialog({
   );
 }
 
+// SE NÃO HOUVER ITENS
 function EmptyState({ message }: { message: string }) {
     return (
         <div className="flex flex-col items-center justify-center py-10 text-center opacity-60">
