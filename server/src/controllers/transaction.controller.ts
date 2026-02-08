@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
 import { TransactionService } from '../services/transaction.service.js';
 
+const transactionService = new TransactionService();
+
 export class TransactionController {
   async index(req: Request, res: Response) {
-    const transactionService = new TransactionService();
     const userId = req.user.id; 
 
     const transactions = await transactionService.findAll(userId);
@@ -11,7 +12,6 @@ export class TransactionController {
   }
 
   async create(req: Request, res: Response) {
-    const transactionService = new TransactionService();
     const userId = req.user.id; 
 
     const transaction = await transactionService.create(userId, req.body);
@@ -19,7 +19,6 @@ export class TransactionController {
   }
 
   async summary(req: Request, res: Response) {
-    const transactionService = new TransactionService();
     const userId = req.user.id;
 
     const summary = await transactionService.getSummary(userId);
@@ -27,7 +26,6 @@ export class TransactionController {
   }
 
   async delete(req: Request, res: Response) {
-    const transactionService = new TransactionService();
     const userId = req.user.id;
     const transactionId = parseInt(req.params.id, 10);
 

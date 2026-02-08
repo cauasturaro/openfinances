@@ -41,22 +41,22 @@ export default function DashboardPage() {
   const { logout } = useAuth();
 
   const [loading, setLoading] = useState(true);
-  
-  // --- USER DATA ---
+
+// User data  
   const [user, setUser] = useState<UserData | null>(null);
 
-  // --- DADOS ---
+  // Data
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<{id: number, name: string, color: string}[]>([]);
-  const [paymentMethods, setPaymentMethods] = useState<{id: number, name: string }[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<{id: number, name: string}[]>([]);
   const [summary, setSummary] = useState<DashboardSummary>({ balance: 0, income: 0, expense: 0 });
-  
-  // --- ESTADOS AUX ---
+
+  // Selected transaction
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  // --- FILTROS ---
+  // Filtros
   const [chartScope, setChartScope] = useState<Scope>("month"); 
   const [chartGranularity, setChartGranularity] = useState<Granularity>("day");
   const [chartType, setChartType] = useState("overview"); 
@@ -317,7 +317,34 @@ export default function DashboardPage() {
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E4E4E7" />
                       <XAxis dataKey="name" stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} dy={10} />
                       <YAxis stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
-                      <Tooltip cursor={{fill: '#f4f4f5'}} contentStyle={{ borderRadius: '8px' }} />
+                      <Tooltip 
+                        cursor={{fill: '#f4f4f5'}}
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                             const data = payload[0].payload;
+                             return (
+                               <div className="bg-white p-3 border border-zinc-200 rounded-lg shadow-lg text-sm z-50">
+                                 <p className="font-semibold mb-2 text-zinc-900 border-b pb-1">{data.fullDate}</p>
+                                 <div className="space-y-1">
+                                    <p className="text-emerald-600 flex justify-between gap-4">
+                                      <span>Income:</span>
+                                      <span>{formatCurrency(data.income)}</span>
+                                    </p>
+                                    <p className="text-red-600 flex justify-between gap-4">
+                                      <span>Expense:</span>
+                                      <span>{formatCurrency(data.expense)}</span>
+                                    </p>
+                                    <div className="border-t pt-1 mt-1 font-bold text-zinc-900 flex justify-between gap-4">
+                                      <span>Balance:</span>
+                                      <span>{formatCurrency(data.balance)}</span>
+                                    </div>
+                                 </div>
+                               </div>
+                             )
+                          }
+                          return null;
+                        }}
+                      />
                       {chartType === 'overview' && <Bar dataKey="balance" fill="#3f3f46" radius={[4, 4, 4, 4]} barSize={20} />}
                       {chartType === 'income' && <Bar dataKey="income" fill="#10b981" radius={[4, 4, 0, 0]} barSize={20} />}
                       {chartType === 'expense' && <Bar dataKey="expense" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={20} />}
@@ -364,7 +391,7 @@ export default function DashboardPage() {
                              <Badge 
                                 variant="outline" 
                                 className="px-1.5 py-0 rounded text-[10px] font-normal uppercase tracking-wide border-0 truncate max-w-24 sm:max-w-none text-white"
-                                style={{ fontWeight: 'bold', backgroundColor: transaction.category?.color || '#52525b' }} 
+                                style={{ backgroundColor: transaction.category?.color || '#52525b' }} 
                              >
                                 {transaction.category?.name}
                              </Badge>

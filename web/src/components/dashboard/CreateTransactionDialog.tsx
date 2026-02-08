@@ -217,7 +217,7 @@ export function CreateTransactionDialog({ onSuccess, categories, paymentMethods,
                     <SelectTrigger className="w-full h-11">
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-55">
                       {categories.map((cat) => (
                         <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>
                       ))}
@@ -243,7 +243,7 @@ export function CreateTransactionDialog({ onSuccess, categories, paymentMethods,
                     <SelectTrigger className="w-full h-11">
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-55">
                       {paymentMethods.map((pm) => (
                         <SelectItem key={pm.id} value={String(pm.id)}>{pm.name}</SelectItem>
                       ))}

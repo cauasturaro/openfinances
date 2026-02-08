@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TransactionService } from "@/services/TransactionService";
 import { Loader2, Plus, Tag, CreditCard, Trash2, AlertCircle, Check } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,19 +10,9 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
-// Paleta de cores (Tailwind shades 500)
 const COLORS = [
-  "#ef4444", // Red
-  "#f97316", // Orange
-  "#f59e0b", // Amber
-  "#84cc16", // Lime
-  "#10b981", // Emerald
-  "#06b6d4", // Cyan
-  "#3b82f6", // Blue
-  "#6366f1", // Indigo
-  "#a855f7", // Purple
-  "#ec4899", // Pink
-  "#71717a", // Zinc
+  "#ef4444", "#f97316", "#f59e0b", "#84cc16", "#10b981", 
+  "#06b6d4", "#3b82f6", "#6366f1", "#a855f7", "#ec4899", "#71717a",
 ];
 
 interface RemovableItemProps {
@@ -48,7 +37,7 @@ function RemovableItem({ id, name, color, icon, onDelete }: RemovableItemProps) 
   };
 
   return (
-    <div className="group flex items-center justify-between p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all shadow-sm">
+    <div className="group flex items-center justify-between p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all shadow-sm mb-2 last:mb-0">
       <div className="flex items-center gap-3 overflow-hidden">
         <div 
           className={cn(
@@ -111,6 +100,12 @@ export function ManageDataDialog({
   const [selectedColor, setSelectedColor] = useState(COLORS[4]); 
   const [activeTab, setActiveTab] = useState(defaultTab);
 
+  useEffect(() => {
+    if (showOpen) {
+      setActiveTab(defaultTab);
+    }
+  }, [showOpen, defaultTab]);
+
   const handleCreate = async () => {
     if (!newItemName.trim()) return;
     setLoading(true);
@@ -149,8 +144,8 @@ export function ManageDataDialog({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-125 p-0 gap-0 overflow-hidden">
-        <div className="p-6 pb-2">
+      <DialogContent className="sm:max-w-md p-0 gap-0 overflow-hidden">
+        <div className="p-6 pb-4">
             <DialogHeader>
             <DialogTitle>Manage Classifications</DialogTitle>
             <DialogDescription>
@@ -159,7 +154,12 @@ export function ManageDataDialog({
             </DialogHeader>
         </div>
 
-        <Tabs defaultValue={defaultTab} value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
+        <Tabs 
+          defaultValue={defaultTab} 
+          value={activeTab} 
+          onValueChange={(v) => setActiveTab(v as any)} 
+          className="w-full"
+        >
           <div className="px-6 border-b border-zinc-100 dark:border-zinc-800">
             <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="categories">Categories</TabsTrigger>
@@ -167,7 +167,7 @@ export function ManageDataDialog({
             </TabsList>
           </div>
           
-          <div className="p-6 pt-4 bg-zinc-50/50 dark:bg-black/20 min-h-100 flex flex-col">
+          <div className="p-6 pt-4 bg-zinc-50/50 dark:bg-black/20 flex flex-col">
             <div className="flex flex-col gap-3 mb-6">
                 <div className="flex gap-2">
                     <Input 
@@ -217,8 +217,8 @@ export function ManageDataDialog({
                 </span>
             </div>
 
-            <ScrollArea className="flex-1 -mr-4 pr-4 h-62.5">
-                <div className="grid grid-cols-1 gap-2 pb-2">
+            <ScrollArea className="h-75 w-full pr-4 rounded-md border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900/30">
+                <div className="p-3">
                 {activeTab === 'categories' ? (
                     categories.length === 0 ? (
                         <EmptyState message="No categories created yet." />
@@ -260,7 +260,7 @@ export function ManageDataDialog({
 
 function EmptyState({ message }: { message: string }) {
     return (
-        <div className="flex flex-col items-center justify-center py-10 text-center border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-lg opacity-60">
+        <div className="flex flex-col items-center justify-center py-10 text-center opacity-60">
             <AlertCircle className="h-8 w-8 text-muted-foreground mb-2" />
             <p className="text-sm text-muted-foreground">{message}</p>
         </div>

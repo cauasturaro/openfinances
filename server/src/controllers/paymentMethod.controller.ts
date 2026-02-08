@@ -1,16 +1,16 @@
 import { Request, Response } from 'express';
 import { PaymentMethodService } from '../services/paymentMethod.service.js';
 
+    const service = new PaymentMethodService();
+
 export class PaymentMethodController {
   async index(req: Request, res: Response) {
-    const service = new PaymentMethodService();
     const userId = req.user.id;
     const methods = await service.findAll(userId);
     return res.json(methods);
   }
 
   async create(req: Request, res: Response) {
-    const service = new PaymentMethodService();
     const userId = req.user.id;
     const { name } = req.body;
 
@@ -19,7 +19,6 @@ export class PaymentMethodController {
   }
 
   async delete(req: Request, res: Response) {
-    const service = new PaymentMethodService();
     const userId = req.user.id;
     const paymentMethodId = parseInt(req.params.id, 10);
 

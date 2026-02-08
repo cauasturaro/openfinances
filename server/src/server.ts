@@ -2,8 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
-
-
 import { userRoutes } from './routes/user.routes.js';
 import { categoryRoutes } from './routes/category.routes.js';
 import { transactionRoutes } from './routes/transaction.routes.js';
@@ -26,6 +24,7 @@ app.use('/categories', categoryRoutes);
 app.use('/payment-methods', paymentMethodRoutes);
 app.use('/transactions', transactionRoutes);
 
+// ROTA DE CHECAGEM DE STATUS
 app.get('/', (req, res) => {
   res.send('OpenFinances\' API is Running');
 });

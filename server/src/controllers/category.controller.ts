@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
 import { CategoryService } from '../services/category.service.js';
 
+const categoryService = new CategoryService();
+
 export class CategoryController {
   async index(req: Request, res: Response) {
-    const categoryService = new CategoryService();
     const userId = req.user.id;
 
     const categories = await categoryService.findAll(userId);
@@ -11,7 +12,6 @@ export class CategoryController {
   }
 
   async create(req: Request, res: Response) {
-    const categoryService = new CategoryService();
     const userId = req.user.id;
     const { name, color } = req.body;
 
@@ -20,7 +20,6 @@ export class CategoryController {
   }
 
   async delete(req: Request, res: Response) {
-    const categoryService = new CategoryService();
     const userId = req.user.id;
     const categoryId = parseInt(req.params.id, 10);
 

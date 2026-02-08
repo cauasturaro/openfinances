@@ -1,9 +1,10 @@
 import { Request, Response } from 'express';
 import { UserService } from '../services/user.service.js';
 
+const userService = new UserService();
+
 export class UserController {
     async register(req: Request, res: Response) {
-        const userService = new UserService();
 
         try {
         const result = await userService.register(req.body);
@@ -20,7 +21,6 @@ export class UserController {
     }
 
 async login(req: Request, res: Response) {
-        const userService = new UserService();
         const { email, password, rememberMe } = req.body; 
 
         try {
